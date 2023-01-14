@@ -19,9 +19,15 @@ public class Post {
     private String text;
 
     @Column(name = "datetime", nullable = false)
-    private LocalDateTime dataTime;
+    private LocalDateTime dateTime;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @PrePersist
+    public void prePersist(){
+        setDateTime(LocalDateTime.now());
+    }
+
 }
