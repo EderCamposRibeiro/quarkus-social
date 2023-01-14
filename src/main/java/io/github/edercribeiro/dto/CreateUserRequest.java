@@ -2,10 +2,16 @@ package io.github.edercribeiro.dto;
 
 // Esse código é o responsável por Respeitar o contrato da API:
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 public class CreateUserRequest {
+
+    @NotBlank(message = "Name is Required")
     private String name;
+
+    @NotNull(message = "Age is Required")
     private Integer age;
 
     public String getName() {
