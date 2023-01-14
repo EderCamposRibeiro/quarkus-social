@@ -1,4 +1,4 @@
-package io.github.edercribeiro;
+package io.github.edercribeiro.dominio;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
