@@ -13,3 +13,9 @@ CREATE TABLE public.POSTS (
     dateTime timestamp not null,
     user_id bigint NOT NULL references public.users(id),
     CONSTRAINT POSTS_pkey PRIMARY KEY (id));
+
+CREATE TABLE public.FOLLOWERS (
+    id bigserial NOT NULL,
+    user_id bigint NOT NULL references public.users(id),
+    follower_id bigint NOT NULL references public.users(id),
+    CONSTRAINT FOLLOWERS_pkey PRIMARY KEY (id));
