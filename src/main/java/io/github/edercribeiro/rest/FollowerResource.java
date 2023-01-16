@@ -7,6 +7,7 @@ import io.github.edercribeiro.domain.model.repository.UserRepository;
 import io.github.edercribeiro.dto.FollowerRequest;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -27,6 +28,7 @@ public class FollowerResource {
     }
 
     @PUT
+    @Transactional
     public Response followUser(
             @PathParam("userId") Long userId , FollowerRequest request){
         var user = userRepository.findById(userId);
@@ -36,11 +38,15 @@ public class FollowerResource {
 
         var follower = userRepository.findById(request.getFollowerId());
 
-        var entity = new Follower();
-        entity.setUser(user);
-        entity.setFollower(follower);
+        var follows = repository.follows(follower, user);
 
-        repository.persist(entity);
+        if(!follows){
+            var entity = new Follower();
+            entity.setUser(user);
+            entity.setFollower(follower);
+
+            repository.persist(entity);
+        }
 
         return Response.status(Response.Status.NO_CONTENT).build();
     }
