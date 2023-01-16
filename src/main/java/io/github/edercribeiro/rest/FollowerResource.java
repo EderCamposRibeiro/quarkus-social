@@ -12,6 +12,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static org.locationtech.jts.edgegraph.EdgeGraphBuilder.build;
+
 @Path("/users/{userId}/followers")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -31,6 +33,13 @@ public class FollowerResource {
     @Transactional
     public Response followUser(
             @PathParam("userId") Long userId , FollowerRequest request){
+
+        if(userId.equals(request.getFollowerId())){
+            return Response.status(Response.Status.CONFLICT)
+                    .entity("You_can't_follow_yourself")
+                    .build();
+        }
+
         var user = userRepository.findById(userId);
         if(user == null){
             return Response.status(Response.Status.NOT_FOUND).build();
