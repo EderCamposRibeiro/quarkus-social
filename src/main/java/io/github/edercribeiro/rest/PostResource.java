@@ -2,6 +2,7 @@ package io.github.edercribeiro.rest;
 
 import io.github.edercribeiro.domain.model.Post;
 import io.github.edercribeiro.domain.model.User;
+import io.github.edercribeiro.domain.model.repository.FollowerRepository;
 import io.github.edercribeiro.domain.model.repository.PostRepository;
 import io.github.edercribeiro.domain.model.repository.UserRepository;
 import io.github.edercribeiro.dto.CreatePostRequest;
@@ -21,15 +22,18 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 public class PostResource {
 
+    private FollowerRepository followerRepository;
     private PostRepository repository;
     private UserRepository userRepository;
 
     @Inject
     public PostResource(UserRepository userRepository,
-                        PostRepository repository) {
+                        PostRepository repository,
+                        FollowerRepository followerRepository) {
 
         this.userRepository = userRepository;
         this.repository = repository;
+        this.followerRepository = followerRepository;
     }
 
     @POST
@@ -51,10 +55,33 @@ public class PostResource {
     }
 
     @GET
-    public Response listPost( @PathParam("userId") Long userId){
+    public Response listPost( @PathParam("userId") Long userId,
+                              @HeaderParam("followerId") Long followerId){
         User user = userRepository.findById(userId);
         if (user == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        if(followerId == null || followerId == 0){
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("You forgot the follower identification number!")
+                    .build();
+        }
+
+        var follower = userRepository.findById(followerId);
+
+        if (follower == null){
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Follower does not exist!")
+                    .build();
+        }
+
+        var follows = followerRepository.follows(follower, user);
+
+        if(!follows){
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("You can't see these posts!")
+                    .build();
         }
 
         // Para gerar essa "query" dentro do find basta abrir as áspas duplas.
