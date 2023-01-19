@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserResourceTest {
 
+    // Uma das formas de mapear a URL! A outra está na classe PostResourceTest.java
     @TestHTTPResource("/users")
     URL apiUrl;
 
