@@ -141,6 +141,34 @@ class FollowerResourceTest {
         assertEquals(1, followersContent.size());
     }
 
+    @Test
+    @DisplayName("Should return 404 on unfollow user and User id doesn't exist!")
+    public void userNotFoundWhenUnfollowAUserTest(){
+
+        var nonexistentUserId = 999;
+
+        given()
+                .pathParam("userId", nonexistentUserId)
+                .queryParam("followerId", followerId)
+                .when()
+                .delete()
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should Unfollow a user!")
+    public void unfollowUserTest(){
+
+        given()
+                .pathParam("userId", userId)
+                .queryParam("followerId", followerId)
+                .when()
+                .delete()
+                .then()
+                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
+    }
+
 }
 
 
