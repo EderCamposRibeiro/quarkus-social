@@ -1,6 +1,10 @@
 package io.github.edercribeiro.rest;
 
+import io.github.edercribeiro.domain.model.Follower;
+import io.github.edercribeiro.domain.model.Post;
 import io.github.edercribeiro.domain.model.User;
+import io.github.edercribeiro.domain.model.repository.FollowerRepository;
+import io.github.edercribeiro.domain.model.repository.PostRepository;
 import io.github.edercribeiro.domain.model.repository.UserRepository;
 import io.github.edercribeiro.dto.CreatePostRequest;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -22,18 +26,51 @@ class PostResourceTest {
 
     @Inject
     UserRepository userRepository;
+    @Inject
+    FollowerRepository followerRepository;
+
+    @Inject
+    PostRepository postRepository;
+
     Long userId;
+    Long userNotFollowerId;
+    Long userFollowerId;
 
 
     @BeforeEach
     @Transactional
     public void setUP(){
+        // Usuário padrão dos testes
         var user = new User();
         user.setAge(30);
         user.setName("Fulano");
-
         userRepository.persist(user);
         userId = user.getId();
+
+        // Cria a postagem para o usuário.
+        Post post = new Post();
+        post.setText("Hello");
+        post.setUser(user);
+        postRepository.persist(post);
+
+        // Usuário que não é um seguidor
+        var userNotFollower = new User();
+        userNotFollower.setAge(33);
+        userNotFollower.setName("Cicrano");
+        userRepository.persist(userNotFollower);
+        userNotFollowerId = userNotFollower.getId();
+
+        // Usuário que é um seguidor
+        var userFollower = new User();
+        userFollower.setAge(35);
+        userFollower.setName("Beltrano");
+        userRepository.persist(userFollower);
+        userFollowerId = userFollower.getId();
+
+        Follower follower = new Follower();
+        follower.setUser(user);
+        follower.setFollower(userFollower);
+        followerRepository.persist(follower);
     }
 
     @Test
@@ -112,13 +149,28 @@ class PostResourceTest {
     @Test
     @DisplayName("Should return 403 when follower does not follow")
     public void listPostNotAFollowerTest(){
-
+        given()
+                .pathParam("userId", userId)
+                .header("followerId", userNotFollowerId)
+                .when()
+                .get()
+                .then()
+                .statusCode(403)
+                .body(Matchers.is("You can't see these posts!"));
     }
 
     @Test
     @DisplayName("Should return posts")
     public void listPostTest(){
-
+        given()
+                .pathParam("userId", userId)
+                .header("followerId", userFollowerId)
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .body("size()", Matchers.is(1));
     }
+
 }
 
