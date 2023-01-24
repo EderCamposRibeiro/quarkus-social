@@ -71,7 +71,7 @@ public class PostResource {
         var follower = userRepository.findById(followerId);
 
         if (follower == null){
-            return Response.status(Response.Status.NOT_FOUND)
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Follower does not exist!")
                     .build();
         }

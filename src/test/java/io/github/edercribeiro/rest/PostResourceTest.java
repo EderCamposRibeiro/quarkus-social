@@ -6,6 +6,7 @@ import io.github.edercribeiro.dto.CreatePostRequest;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestHTTPEndpoint(PostResource.class) // Uma das formas de mapear a URL! A outra está na classe UserResourceTest.java
@@ -73,18 +73,40 @@ class PostResourceTest {
     @Test
     @DisplayName("Should return 404 when user does not exist")
     public void listPostUserNotFoundTest(){
+        var nonexistentUserId = 999;
 
+        given()
+                .pathParam("userId", nonexistentUserId)
+                .when()
+                .get()
+                .then()
+                .statusCode(404);
     }
 
     @Test
     @DisplayName("Should return 400 when followerId header not found")
     public void listPostFollowerHeaderNotSentTest(){
 
+        given()
+                .pathParam("userId", userId)
+                .when()
+                .get()
+                .then()
+                .statusCode(400)
+                .body(Matchers.is("You forgot the follower identification number!"));
     }
     @Test
     @DisplayName("Should return 400 when follower does not exist")
     public void listPostFollowerNonexistentTest(){
-
+        var nonexistentFollowerId = 999;
+        given()
+                .pathParam("userId", userId)
+                .header("followerId", nonexistentFollowerId)
+                .when()
+                .get()
+                .then()
+                .statusCode(400)
+                .body(Matchers.is("Follower does not exist!"));
     }
 
     @Test
